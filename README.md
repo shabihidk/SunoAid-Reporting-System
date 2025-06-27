@@ -192,17 +192,5 @@ The application includes CORS setup for cross-origin requests between frontend (
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
 
-- Built with modern web technologies
-- Inspired by successful civic engagement platforms
-- Designed for real-world government use cases
-
-## 📞 Support
-
-For support, please open an issue in the GitHub repository or contact the development team.
-
----
-
-**SunoAid** - Empowering communities through technology 🏛️✨
 
