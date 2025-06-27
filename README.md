@@ -18,12 +18,12 @@ A modern, full-stack civic issue reporting platform built with React, Flask, and
 
 ### 🏛️ **Government Features**  
 - **Issue Management**: Track, assign, and resolve reported issues
-- **Department Coordination**: Route issues to appropriate departments
-- **Analytics Dashboard**: Monitor trends and response times
+- // **Department Coordination**: Route issues to appropriate departments
+- // **Analytics Dashboard**: Monitor trends and response times
 - **Citizen Communication**: Update citizens on issue progress
 
 ### 🎨 **Technical Features**
-- **Apple-inspired UI**: Modern, clean design with smooth animations
+- **UI**: Modern, clean design with smooth animations
 - **Responsive Design**: Works perfectly on mobile, tablet, and desktop
 - **Real-time Updates**: Live status updates and notifications
 - **Media Upload**: Support for multiple image uploads
