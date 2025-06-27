@@ -27,8 +27,8 @@ A modern, full-stack civic issue reporting platform built with React, Flask, and
 - **Responsive Design**: Works perfectly on mobile, tablet, and desktop
 - **Real-time Updates**: Live status updates and notifications
 - **Media Upload**: Support for multiple image uploads
-- **Geolocation**: Automatic location detection and mapping
-- **Advanced Filtering**: Search and filter by category, status, location
+- // **Geolocation**: Automatic location detection and mapping
+- // **Filtering**: Search and filter by category, status, location
 - **Secure Authentication**: JWT-based user authentication
 
 ## 🚀 Quick Start
@@ -91,7 +91,6 @@ A modern, full-stack civic issue reporting platform built with React, Flask, and
 ## 📖 Documentation
 
 - **[Quick Start Guide](QUICK_START.md)** - Complete setup instructions
-- **[API Documentation](docs/API.md)** - Backend API reference
 - **[Database Schema](database_schema.sql)** - Database structure
 - **[CORS Setup](cors_setup_example.py)** - Cross-origin configuration reference
 
@@ -206,3 +205,4 @@ For support, please open an issue in the GitHub repository or contact the develo
 ---
 
 **SunoAid** - Empowering communities through technology 🏛️✨
+
