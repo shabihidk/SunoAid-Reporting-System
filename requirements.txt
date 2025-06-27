@@ -1,6 +1,8 @@
 flask
 flask-login
-sqlalchemy
+flask-sqlalchemy
 flask-mail
-psycopg[binary]
+flask-cors
+psycopg2-binary
 python-dotenv
+bcrypt

@@ -129,14 +129,6 @@ class User(db.Model, UserMixin):
             'occupation': self.occupation,
             'bio': self.bio
         }
-    
-    def set_password(self, password):
-        """Set password directly (no hashing for development)"""
-        self.password = password
-    
-    def check_password(self, password):
-        """Check if provided password matches (no hashing for development)"""
-        return self.password == password
 
 # --- Category Model ---
 class Category(db.Model):
@@ -193,7 +185,6 @@ class Issue(db.Model):
     is_anonymous = db.Column(db.Boolean, default=False)
     is_urgent = db.Column(db.Boolean, default=False)
     is_public = db.Column(db.Boolean, default=True)
-    media_urls = db.Column(db.JSON, default=list)  # Store media URLs as JSON array
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
     resolved_at = db.Column(db.DateTime)
@@ -225,7 +216,6 @@ class Issue(db.Model):
             'is_anonymous': self.is_anonymous,
             'is_urgent': self.is_urgent,
             'is_public': self.is_public,
-            'media_urls': self.media_urls or [],
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
             'user': self.user.to_dict() if self.user else None,
