@@ -27,11 +27,36 @@ A modern, full-stack civic issue reporting platform built with React, Flask, and
 - **Responsive Design**: Works perfectly on mobile, tablet, and desktop
 - **Real-time Updates**: Live status updates and notifications
 - **Media Upload**: Support for multiple image uploads
-- **Geolocation**: Automatic location detection and mapping
-- **Advanced Filtering**: Search and filter by category, status, location
+- // **Geolocation**: Automatic location detection and mapping
+- // **Filtering**: Search and filter by category, status, location
 - **Secure Authentication**: JWT-based user authentication
 
 ## 🚀 Quick Start
+
+### 🎯 **Option 1: Automated Setup (Recommended)**
+
+Simply run the automated launcher - it handles everything for you!
+
+**Windows:**
+```cmd
+python run_sunoaid.py
+# OR double-click: start_sunoaid.bat
+```
+
+**Linux/Mac:**
+```bash
+python3 run_sunoaid.py
+# OR: ./start_sunoaid.sh
+```
+
+The automated launcher will:
+- ✅ Check all prerequisites 
+- ✅ Set up virtual environment
+- ✅ Install all dependencies
+- ✅ Start both frontend and backend
+- ✅ Open the application automatically
+
+### 🛠️ **Option 2: Manual Setup**
 
 ### Prerequisites
 - Python 3.8+
@@ -88,10 +113,27 @@ A modern, full-stack civic issue reporting platform built with React, Flask, and
    - Backend API: http://localhost:5000
    - Health Check: http://localhost:5000/api/health
 
+### 🎮 **Launcher Options**
+
+The automated launcher supports several options:
+
+```bash
+# Setup only (don't start servers)
+python run_sunoaid.py --setup-only
+
+# Start backend only
+python run_sunoaid.py --no-frontend
+
+# Start frontend only  
+python run_sunoaid.py --no-backend
+
+# Full help
+python run_sunoaid.py --help
+```
+
 ## 📖 Documentation
 
 - **[Quick Start Guide](QUICK_START.md)** - Complete setup instructions
-- **[API Documentation](docs/API.md)** - Backend API reference
 - **[Database Schema](database_schema.sql)** - Database structure
 - **[CORS Setup](cors_setup_example.py)** - Cross-origin configuration reference
 
