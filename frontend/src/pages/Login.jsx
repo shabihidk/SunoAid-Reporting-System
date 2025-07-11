@@ -38,6 +38,8 @@ const Login = ({ onLogin }) => {
       const data = await response.json();
 
       if (response.ok) {
+        // Store token in localStorage
+        localStorage.setItem('authToken', data.token);
         onLogin(data.user);
         navigate('/dashboard');
       } else {

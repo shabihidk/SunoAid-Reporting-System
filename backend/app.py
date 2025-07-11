@@ -1,17 +1,27 @@
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from models import db, User, Issue, Location
+import uuid
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key-here'  # Change this in production
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:qwerty12345@localhost/sunoaid'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:password@localhost/sunoaid')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-
 
 # Initialize extensions
 db.init_app(app)
-CORS(app, supports_credentials=True, origins=['http://localhost:3000', 'http://localhost:5173'])  # Enable CORS with credentials support
+
+# CORS configuration
+cors_origins = os.getenv('CORS_ORIGINS', 'http://localhost:3000,http://localhost:5173').split(',')
+CORS(app, supports_credentials=True, origins=cors_origins)
+
+# Simple in-memory store for active sessions (simplified)
+active_sessions = {}
 
 
 
@@ -59,11 +69,13 @@ def login():
 
         # Check if user exists and password matches (no hashing)
         if user and user.password == password:
-            # Store user ID in session
-            session['user_id'] = user.id
-            print(f"User {user.id} logged in, session: {dict(session)}")
+            # Create a simple session token
+            session_token = str(uuid.uuid4())
+            active_sessions[session_token] = user.id
+            
             return jsonify({
                 'message': 'Login successful',
+                'token': session_token,
                 'user': {
                     'id': user.id,
                     'name': user.name,
@@ -81,22 +93,28 @@ def login():
 
 @app.route('/api/logout', methods=['POST'])
 def logout():
-    session.pop('user_id', None)
+    auth_header = request.headers.get('Authorization')
+    if auth_header and auth_header.startswith('Bearer '):
+        token = auth_header.split(' ')[1]
+        active_sessions.pop(token, None)
     return jsonify({'message': 'Logged out successfully'}), 200
 
 @app.route('/api/user', methods=['GET'])
 def get_current_user():
-    user_id = session.get('user_id')
-    if user_id:
-        user = User.query.get(user_id)
-        if user:
-            return jsonify({
-                'user': {
-                    'id': user.id,
-                    'name': user.name,
-                    'email': user.email
-                }
-            }), 200
+    auth_header = request.headers.get('Authorization')
+    if auth_header and auth_header.startswith('Bearer '):
+        token = auth_header.split(' ')[1]
+        user_id = active_sessions.get(token)
+        if user_id:
+            user = User.query.get(user_id)
+            if user:
+                return jsonify({
+                    'user': {
+                        'id': user.id,
+                        'name': user.name,
+                        'email': user.email
+                    }
+                }), 200
     return jsonify({'error': 'Not authenticated'}), 401
 
 
@@ -143,19 +161,18 @@ def get_issues():
 @app.route('/api/issues', methods=['POST'])
 def create_issue():
     try:
-        # debug 1
-        print(f"Session contents: {dict(session)}")
-        
-        # debug 2
-        user_id = session.get('user_id')
-        print(f"User ID from session: {user_id}")
-        
-        if not user_id:
+        # Check authentication
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
             return jsonify({'error': 'Authentication required'}), 401
             
+        token = auth_header.split(' ')[1]
+        user_id = active_sessions.get(token)
+        
+        if not user_id:
+            return jsonify({'error': 'Invalid or expired token'}), 401
+            
         data = request.get_json()
-
-        #debug 3
         print(f"Creating issue with data: {data}")
         
         # Create location first

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import React, { useState, useRef, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -11,95 +11,76 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Component to handle map clicks
-function LocationMarker({ position, setPosition }) {
-  useMapEvents({
-    click(e) {
-      setPosition(e.latlng);
-    },
-  });
+// Component to update map view when position changes
+const MapUpdater = ({ center, zoom }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (center) {
+      map.setView(center, zoom);
+    }
+  }, [center, zoom, map]);
+  
+  return null;
+};
 
-  return position === null ? null : (
-    <Marker position={position}>
-      <Popup>Issue location</Popup>
-    </Marker>
-  );
-}
-
-const LocationPicker = ({ onLocationSelect, initialPosition = null }) => {
-  const [position, setPosition] = useState(initialPosition);
-  const [userLocation, setUserLocation] = useState(null);
+const LocationPicker = ({ onLocationSelect }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [position, setPosition] = useState(null);
   const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
+  const [mapKey, setMapKey] = useState(0); // Force map re-render
+  const mapRef = useRef(null);
 
-  // Get user's current location
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const userPos = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          };
-          setUserLocation(userPos);
-          if (!initialPosition) {
-            setPosition(userPos);
-          }
-        },
-        (error) => {
-          console.error('Error getting location:', error);
-          // Default to a general location if geolocation fails
-          const defaultPos = { lat: 45.4215, lng: -75.6919 }; // Ottawa, Canada
-          setUserLocation(defaultPos);
-          if (!initialPosition) {
-            setPosition(defaultPos);
-          }
-        }
-      );
-    }
-  }, [initialPosition]);
-
-  // Reverse geocoding to get address from coordinates
-  const getAddressFromCoords = async (lat, lng) => {
+  const searchLocation = async () => {
+    if (!searchQuery.trim()) return;
+    
     setLoading(true);
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1&addressdetails=1`
       );
       const data = await response.json();
-      if (data.display_name) {
-        setAddress(data.display_name);
+      
+      if (data && data.length > 0) {
+        const result = data[0];
+        const newPosition = {
+          lat: parseFloat(result.lat),
+          lng: parseFloat(result.lon)
+        };
+        
+        setPosition(newPosition);
+        setAddress(result.display_name);
+        setMapKey(prev => prev + 1); // Force map re-render with new center
+        
+        // Send location data to parent
         if (onLocationSelect) {
           onLocationSelect({
-            lat,
-            lng,
-            address: data.display_name,
-            city: data.address?.city || data.address?.town || data.address?.village || '',
-            province: data.address?.state || data.address?.province || ''
+            lat: newPosition.lat,
+            lng: newPosition.lng,
+            address: result.display_name,
+            city: result.address?.city || result.address?.town || '',
+            province: result.address?.state || result.address?.province || ''
           });
         }
+      } else {
+        alert('Location not found. Please try a different search.');
       }
     } catch (error) {
-      console.error('Error getting address:', error);
-      setAddress('Address not found');
+      console.error('Error searching location:', error);
+      alert('Error searching location. Please try again.');
     }
     setLoading(false);
   };
 
-  // Update address when position changes
-  useEffect(() => {
-    if (position) {
-      getAddressFromCoords(position.lat, position.lng);
-    }
-  }, [position]);
-
-  const handleUseCurrentLocation = () => {
-    if (userLocation) {
-      setPosition(userLocation);
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      searchLocation();
     }
   };
 
-  const mapCenter = position || userLocation || { lat: 45.4215, lng: -75.6919 };
+  const defaultCenter = { lat: 45.4215, lng: -75.6919 }; // Ottawa, Canada
+  const mapCenter = position || defaultCenter;
 
   return (
     <div className="space-y-4">
@@ -107,59 +88,65 @@ const LocationPicker = ({ onLocationSelect, initialPosition = null }) => {
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Issue Location
         </label>
-        <p className="text-sm text-gray-600 mb-4">
-          Click on the map to select the exact location of the issue, or use your current location.
-        </p>
+        
+        {/* Search Box */}
+        <div className="flex gap-2 mb-4">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Search for an address or location..."
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            type="button"
+            onClick={searchLocation}
+            disabled={loading || !searchQuery.trim()}
+            className="btn-primary"
+          >
+            {loading ? 'Searching...' : 'Search'}
+          </button>
+        </div>
         
         {/* Map Container */}
         <div className="h-64 w-full border border-gray-300 rounded-lg overflow-hidden">
           <MapContainer
+            key={mapKey} // Force re-render when key changes
             center={mapCenter}
-            zoom={15}
+            zoom={position ? 15 : 10}
             style={{ height: '100%', width: '100%' }}
+            ref={mapRef}
           >
+            <MapUpdater center={mapCenter} zoom={position ? 15 : 10} />
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            <LocationMarker position={position} setPosition={setPosition} />
+            {position && (
+              <Marker position={position}>
+                <Popup>Issue location</Popup>
+              </Marker>
+            )}
           </MapContainer>
         </div>
 
-        {/* Controls */}
-        <div className="mt-4 flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={handleUseCurrentLocation}
-            className="btn-secondary text-sm"
-            disabled={!userLocation}
-          >
-            Use Current Location
-          </button>
-          
-          {position && (
-            <div className="text-sm text-gray-600">
-              Coordinates: {position.lat.toFixed(6)}, {position.lng.toFixed(6)}
-            </div>
-          )}
-        </div>
-
         {/* Address Display */}
-        {loading && (
-          <div className="mt-2 text-sm text-gray-600">
-            Getting address...
-          </div>
-        )}
-        
-        {address && !loading && (
-          <div className="mt-2">
+        {address && (
+          <div className="mt-4">
             <label className="block text-sm font-medium text-gray-700">
-              Address
+              Selected Location
             </label>
             <div className="mt-1 p-3 bg-gray-50 border border-gray-300 rounded-md text-sm">
               {address}
             </div>
           </div>
+        )}
+        
+        {!position && (
+          <p className="mt-2 text-sm text-gray-500">
+            Search for a location to place a marker on the map.
+          </p>
         )}
       </div>
     </div>

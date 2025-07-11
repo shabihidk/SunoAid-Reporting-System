@@ -38,12 +38,13 @@ const AddIssue = ({ user }) => {
     }
 
     try {
+      const token = localStorage.getItem('authToken');
       const response = await fetch('http://localhost:5000/api/issues', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
         },
-        credentials: 'include', // Include cookies for authentication
         body: JSON.stringify({
           title: formData.title,
           description: formData.description,

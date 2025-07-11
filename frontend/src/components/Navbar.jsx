@@ -7,10 +7,16 @@ const Navbar = ({ isLoggedIn, user, onLogout }) => {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:5000/api/logout', {
-        method: 'POST',
-        credentials: 'include'
-      });
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        await fetch('http://localhost:5000/api/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        localStorage.removeItem('authToken');
+      }
     } catch (error) {
       console.error('Logout error:', error);
     }
