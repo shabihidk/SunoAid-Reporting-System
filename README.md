@@ -18,12 +18,12 @@ A modern, full-stack civic issue reporting platform built with React, Flask, and
 
 ### 🏛️ **Government Features**  
 - **Issue Management**: Track, assign, and resolve reported issues
-- **Department Coordination**: Route issues to appropriate departments
-- **Analytics Dashboard**: Monitor trends and response times
+- // **Department Coordination**: Route issues to appropriate departments
+- // **Analytics Dashboard**: Monitor trends and response times
 - **Citizen Communication**: Update citizens on issue progress
 
 ### 🎨 **Technical Features**
-- **Apple-inspired UI**: Modern, clean design with smooth animations
+- **UI**: Modern, clean design with smooth animations
 - **Responsive Design**: Works perfectly on mobile, tablet, and desktop
 - **Real-time Updates**: Live status updates and notifications
 - **Media Upload**: Support for multiple image uploads
@@ -235,16 +235,5 @@ The application includes CORS setup for cross-origin requests between frontend (
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
 
-- Built with modern web technologies
-- Inspired by successful civic engagement platforms
-- Designed for real-world government use cases
 
-## 📞 Support
-
-For support, please open an issue in the GitHub repository or contact the development team.
-
----
-
-**SunoAid** - Empowering communities through technology 🏛️✨
