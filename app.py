@@ -1,13 +1,17 @@
 from flask import Flask, jsonify, request, send_from_directory
 import os
 from dotenv import load_dotenv
-from backend import db, login_manager
+from models.models import db
+from flask_login import LoginManager
 from flask_cors import CORS
 
 # Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
+
+# Initialize extensions
+login_manager = LoginManager()
 
 # Static file serving for uploads
 @app.route('/static/uploads/<filename>')
@@ -41,6 +45,7 @@ app.config['SESSION_COOKIE_DOMAIN'] = None   # Allow localhost domains
 # Initialize extensions
 db.init_app(app)
 login_manager.init_app(app)
+login_manager.login_view = 'auth_api.login'
 
 # CORS configuration
 frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:5173')

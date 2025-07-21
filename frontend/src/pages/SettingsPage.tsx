@@ -14,7 +14,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 const SettingsPage: React.FC = () => {
-  const { user, updateProfile } = useAuth();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
   const [notifications, setNotifications] = useState({
     email: true,

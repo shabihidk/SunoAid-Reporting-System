@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Search, MapPin, ThumbsUp, ThumbsDown, MessageCircle, Clock, AlertTriangle, Filter, TrendingUp } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Search, MapPin, ThumbsUp, ThumbsDown, MessageCircle, Clock, AlertTriangle } from 'lucide-react';
+import { motion } from 'framer-motion';
 import axios from 'axios';
 
 interface Issue {
@@ -62,20 +62,6 @@ const DashboardPage: React.FC = () => {
       y: 0,
       transition: {
         duration: 0.5
-      }
-    }
-  };
-
-  const cardHover = {
-    rest: { 
-      scale: 1,
-      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
-    },
-    hover: { 
-      scale: 1.02,
-      boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-      transition: {
-        duration: 0.3
       }
     }
   };
