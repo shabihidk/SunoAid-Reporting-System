@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Camera, MapPin, AlertCircle, Upload, X } from 'lucide-react';
 import axios from 'axios';
+import LocationMap from '../components/LocationMap';
 
 interface Category {
   id: number;
@@ -65,10 +66,17 @@ const ReportIssuePage: React.FC = () => {
     }
   };
 
-  const getCurrentLocation = () => {
+    const getCurrentLocation = () => {
     if (navigator.geolocation) {
+      const options = {
+        enableHighAccuracy: true, // Try to get a more accurate position
+        timeout: 10000,           // Wait up to 10 seconds
+        maximumAge: 0             // Don't use a cached position
+      };
+
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          console.log('Successfully got location:', position.coords);
           setFormData(prev => ({
             ...prev,
             latitude: position.coords.latitude.toString(),
@@ -76,9 +84,14 @@ const ReportIssuePage: React.FC = () => {
           }));
         },
         (error) => {
-          console.error('Error getting location:', error);
-        }
+          // This is where your error is being logged from
+          console.error('Error getting location:', error.message);
+          // You might want to set a default location or show a user-friendly error here
+        },
+        options // Pass the new options object
       );
+    } else {
+      console.error('Geolocation is not supported by this browser.');
     }
   };
 
@@ -86,6 +99,14 @@ const ReportIssuePage: React.FC = () => {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
+    }));
+  };
+
+  const handleMapLocationSelect = (lat: number, lng: number) => {
+    setFormData(prev => ({
+      ...prev,
+      latitude: lat.toString(),
+      longitude: lng.toString()
     }));
   };
 
@@ -333,37 +354,54 @@ const ReportIssuePage: React.FC = () => {
                 </div>
               </div>
 
-              {/* GPS Coordinates */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="latitude" className="block text-sm font-medium text-gray-700 mb-2">
-                    Latitude
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    id="latitude"
-                    name="latitude"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Auto-detected"
-                    value={formData.latitude}
-                    onChange={handleInputChange}
+              {/* GPS Coordinates & Map */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Location Selection
+                </label>
+                <div className="mb-4">
+                  <LocationMap
+                    onLocationSelect={handleMapLocationSelect}
+                    selectedLocation={
+                      formData.latitude && formData.longitude 
+                        ? [parseFloat(formData.latitude), parseFloat(formData.longitude)]
+                        : null
+                    }
+                    height="300px"
                   />
                 </div>
-                <div>
-                  <label htmlFor="longitude" className="block text-sm font-medium text-gray-700 mb-2">
-                    Longitude
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    id="longitude"
-                    name="longitude"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Auto-detected"
-                    value={formData.longitude}
-                    onChange={handleInputChange}
-                  />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="latitude" className="block text-sm font-medium text-gray-700 mb-2">
+                      Latitude
+                    </label>
+                    <input
+                      type="number"
+                      step="any"
+                      id="latitude"
+                      name="latitude"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Click on map to set"
+                      value={formData.latitude}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="longitude" className="block text-sm font-medium text-gray-700 mb-2">
+                      Longitude
+                    </label>
+                    <input
+                      type="number"
+                      step="any"
+                      id="longitude"
+                      name="longitude"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Click on map to set"
+                      value={formData.longitude}
+                      onChange={handleInputChange}
+                    />
+                  </div>
                 </div>
               </div>
 

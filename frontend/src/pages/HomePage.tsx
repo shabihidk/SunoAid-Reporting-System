@@ -1,364 +1,224 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Users, MapPin, TrendingUp, ArrowRight, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ArrowRight, Camera, MessageSquare, TrendingUp, CheckCircle, Users } from 'lucide-react';
+import handsImage from '../assets/images/hands.jpg';
+import exampleImage from '../assets/images/example.jpeg';
 
 const HomePage: React.FC = () => {
-  const fadeInUp = {
-    initial: { opacity: 0, y: 60 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6 }
-  };
-
-  const staggerContainer = {
-    animate: {
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const scaleOnHover = {
-    whileHover: { scale: 1.05 },
-    whileTap: { scale: 0.95 }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50">
+    <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative px-6 lg:px-8 overflow-hidden">
-        <motion.div 
-          className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-indigo-600/5"
-          animate={{
-            background: [
-              "linear-gradient(to right, rgba(59, 130, 246, 0.05), rgba(99, 102, 241, 0.05))",
-              "linear-gradient(to right, rgba(99, 102, 241, 0.05), rgba(59, 130, 246, 0.05))",
-              "linear-gradient(to right, rgba(59, 130, 246, 0.05), rgba(99, 102, 241, 0.05))"
-            ]
+      <section className="relative overflow-hidden">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-5"
+          style={{
+            backgroundImage: `url(${handsImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
           }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         />
         
-        <div className="mx-auto max-w-7xl pt-20 pb-24 sm:pt-32 sm:pb-40 relative">
-          <motion.div 
-            className="text-center"
-            initial="initial"
-            animate="animate"
-            variants={staggerContainer}
-          >
-            <motion.div
-              variants={fadeInUp}
-              className="mb-8"
-            >
-              <motion.div
-                className="inline-flex items-center px-4 py-2 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-sm font-medium mb-6"
-                {...scaleOnHover}
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                Trusted by 10,000+ citizens nationwide
-              </motion.div>
-            </motion.div>
-
-            <motion.h1 
-              variants={fadeInUp}
-              className="text-5xl font-bold tracking-tight text-gray-900 sm:text-7xl bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-800"
-            >
-              Welcome to{' '}
-              <motion.span 
-                className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600"
-                animate={{
-                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-                }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                style={{ backgroundSize: "200% 200%" }}
-              >
-                SunoAid
-              </motion.span>
-            </motion.h1>
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-50/90 via-amber-50/80 to-yellow-50/90" />
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-8 py-24">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
             
-            <motion.p 
-              variants={fadeInUp}
-              className="mt-8 text-xl leading-8 text-gray-600 max-w-3xl mx-auto font-medium"
-            >
-              Your voice matters. Report civic issues, connect with your community, and help build a better tomorrow.
-              Join thousands of citizens making their neighborhoods safer and more liveable.
-            </motion.p>
-            
-            <motion.div 
-              variants={fadeInUp}
-              className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-6"
-            >
-              <motion.div {...scaleOnHover}>
+            {/* Left Content */}
+            <div className="lg:pr-8">
+              <h1 className="text-7xl font-semibold text-gray-900 leading-[0.9] mb-8">
+                Make your
+                <br />
+                <span className="text-orange-600">community</span>
+                <br />
+                better.
+              </h1>
+              
+              <p className="text-2xl text-gray-700 mb-12 leading-relaxed max-w-lg">
+                Report civic issues, collaborate with neighbors, and track real progress in your area.
+              </p>
+              
+              <div className="flex gap-6">
                 <Link
                   to="/register"
-                  className="group relative inline-flex items-center px-8 py-4 text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+                  className="bg-orange-600 text-white px-10 py-5 rounded-2xl font-semibold text-lg hover:bg-orange-700 transition-all duration-300 flex items-center shadow-lg hover:shadow-xl"
                 >
-                  <span className="relative z-10">Get Started</span>
-                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-indigo-700 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  Get Started
+                  <ArrowRight className="ml-3 w-6 h-6" />
                 </Link>
-              </motion.div>
-              
-              <motion.div {...scaleOnHover}>
                 <Link
                   to="/dashboard"
-                  className="group inline-flex items-center px-8 py-4 text-base font-semibold text-gray-700 bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200 hover:border-blue-300 hover:bg-white transition-all duration-300 shadow-sm hover:shadow-md"
+                  className="border-2 border-orange-200 text-orange-800 px-10 py-5 rounded-2xl font-semibold text-lg hover:border-orange-300 hover:bg-orange-50 transition-all duration-300 bg-white/80 backdrop-blur-sm"
                 >
-                  View Issues 
-                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
+                  Browse Issues
                 </Link>
-              </motion.div>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
+              </div>
+            </div>
 
-      {/* Features Section */}
-      <section className="py-20 bg-white/70 backdrop-blur-sm">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <motion.div 
-            className="mx-auto max-w-2xl text-center"
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700">
-              How SunoAid Works
-            </h2>
-            <p className="mt-6 text-lg leading-8 text-gray-600 font-medium">
-              A simple yet powerful platform to connect citizens with their local government
-            </p>
-          </motion.div>
-          
-          <motion.div 
-            className="mx-auto mt-20 max-w-2xl sm:mt-24 lg:mt-28 lg:max-w-none"
-            initial="initial"
-            whileInView="animate"
-            variants={staggerContainer}
-            viewport={{ once: true }}
-          >
-            <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
-              <motion.div 
-                variants={fadeInUp}
-                className="group flex flex-col relative"
-              >
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  whileHover={{ scale: 1.02 }}
-                />
-                <div className="relative p-8">
-                  <dt className="flex items-center gap-x-3 text-base font-bold leading-7 text-gray-900">
-                    <motion.div
-                      className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-500 text-white"
-                      whileHover={{ rotate: 360 }}
-                      transition={{ duration: 0.6 }}
-                    >
-                      <MapPin className="h-6 w-6" />
-                    </motion.div>
-                    Report Issues
-                  </dt>
-                  <dd className="mt-6 flex flex-auto flex-col text-base leading-7 text-gray-600">
-                    <p className="flex-auto font-medium">
-                      Take photos, add descriptions, and pinpoint exact locations of civic issues in your area.
-                    </p>
-                  </dd>
-                </div>
-              </motion.div>
-              
-              <motion.div 
-                variants={fadeInUp}
-                className="group flex flex-col relative"
-              >
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-br from-green-50 to-emerald-50 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  whileHover={{ scale: 1.02 }}
-                />
-                <div className="relative p-8">
-                  <dt className="flex items-center gap-x-3 text-base font-bold leading-7 text-gray-900">
-                    <motion.div
-                      className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-500 text-white"
-                      whileHover={{ rotate: 360 }}
-                      transition={{ duration: 0.6 }}
-                    >
-                      <Users className="h-6 w-6" />
-                    </motion.div>
-                    Community Engagement
-                  </dt>
-                  <dd className="mt-6 flex flex-auto flex-col text-base leading-7 text-gray-600">
-                    <p className="flex-auto font-medium">
-                      Vote, comment, and collaborate with fellow citizens to prioritize important issues.
-                    </p>
-                  </dd>
-                </div>
-              </motion.div>
-              
-              <motion.div 
-                variants={fadeInUp}
-                className="group flex flex-col relative"
-              >
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-br from-purple-50 to-violet-50 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  whileHover={{ scale: 1.02 }}
-                />
-                <div className="relative p-8">
-                  <dt className="flex items-center gap-x-3 text-base font-bold leading-7 text-gray-900">
-                    <motion.div
-                      className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-violet-500 text-white"
-                      whileHover={{ rotate: 360 }}
-                      transition={{ duration: 0.6 }}
-                    >
-                      <TrendingUp className="h-6 w-6" />
-                    </motion.div>
-                    Track Progress
-                  </dt>
-                  <dd className="mt-6 flex flex-auto flex-col text-base leading-7 text-gray-600">
-                    <p className="flex-auto font-medium">
-                      Monitor the status of reported issues and receive updates when they're addressed.
-                    </p>
-                  </dd>
-                </div>
-              </motion.div>
-            </dl>
-          </motion.div>
-        </div>
-      </section>
+            {/* Right Visual */}
+            <div className="relative lg:pl-8">
+              <div className="bg-gradient-to-br from-orange-100/80 to-amber-100/80 rounded-3xl p-12 relative overflow-hidden backdrop-blur-sm border border-orange-200/50">
+                
+                {/* Floating Elements */}
+                <div className="relative z-10">
+                  
+                  {/* Mock Issue Card */}
+                  <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-lg mb-6 transform rotate-1 border border-orange-100">
+                    <div className="flex items-center mb-4">
+                      <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center mr-3">
+                        <span className="text-white font-semibold">JS</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">Muhammad Shabih</p>
+                        <p className="text-sm text-gray-600">2 hours ago</p>
+                      </div>
+                    </div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Broken streetlight on Main St</h3>
+                    <div className="bg-orange-50 h-24 rounded-lg mb-3 border border-orange-100 overflow-hidden">
+                      <img 
+                        src={exampleImage} 
+                        alt="Broken streetlight issue" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center text-emerald-600">
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                          <span className="text-sm font-medium">24</span>
+                        </div>
+                        <div className="flex items-center text-gray-600">
+                          <MessageSquare className="w-4 h-4 mr-1" />
+                          <span className="text-sm">8</span>
+                        </div>
+                      </div>
+                      <span className="text-xs bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-medium border border-amber-200">
+                        In Progress
+                      </span>
+                    </div>
+                  </div>
 
-      {/* Stats Section */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-slate-100">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl lg:max-w-none">
-            <motion.div 
-              className="text-center"
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700">
-                Making Real Impact
-              </h2>
-              <p className="mt-6 text-lg leading-8 text-gray-600 font-medium">
-                Join our growing community of engaged citizens
-              </p>
-            </motion.div>
-            
-            <motion.dl 
-              className="mt-20 grid grid-cols-1 gap-6 overflow-hidden sm:grid-cols-2 lg:grid-cols-4"
-              initial="initial"
-              whileInView="animate"
-              variants={staggerContainer}
-              viewport={{ once: true }}
-            >
-              {[
-                { label: "Issues Reported", value: "12,345", color: "from-blue-500 to-indigo-500" },
-                { label: "Issues Resolved", value: "8,762", color: "from-green-500 to-emerald-500" },
-                { label: "Active Citizens", value: "5,432", color: "from-purple-500 to-violet-500" },
-                { label: "Cities Covered", value: "127", color: "from-orange-500 to-red-500" }
-              ].map((stat, index) => (
-                <motion.div 
-                  key={stat.label}
-                  variants={fadeInUp}
-                  className="group relative"
-                >
-                  <motion.div
-                    className="flex flex-col bg-white/80 backdrop-blur-sm p-8 rounded-3xl border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300"
-                    whileHover={{ y: -8, scale: 1.02 }}
-                  >
-                    <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${stat.color} rounded-t-3xl`} />
-                    <dt className="text-sm font-semibold leading-6 text-gray-600 uppercase tracking-wider">
-                      {stat.label}
-                    </dt>
-                    <motion.dd 
-                      className="order-first text-4xl font-bold tracking-tight text-gray-900 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700"
-                      initial={{ scale: 0 }}
-                      whileInView={{ scale: 1 }}
-                      transition={{ delay: index * 0.1, type: "spring", stiffness: 100 }}
-                      viewport={{ once: true }}
-                    >
-                      {stat.value}
-                    </motion.dd>
-                  </motion.div>
-                </motion.div>
-              ))}
-            </motion.dl>
+                </div>
+
+                {/* Background Decorations */}
+                <div className="absolute top-8 right-8 w-16 h-16 bg-orange-200/60 rounded-full"></div>
+                <div className="absolute bottom-12 left-8 w-12 h-12 bg-amber-200/70 rounded-full"></div>
+                <div className="absolute top-1/2 right-16 w-8 h-8 bg-yellow-200/60 rounded-full"></div>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="relative bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 overflow-hidden">
-        <motion.div
-          className="absolute inset-0 opacity-20"
+      {/* Features Section */}
+      <section className="py-32 bg-gradient-to-b from-orange-50/50 to-white">
+        <div className="max-w-7xl mx-auto px-8">
+          
+          {/* Section Header */}
+          <div className="text-center mb-20">
+            <h2 className="text-5xl font-semibold text-gray-900 mb-6">
+              Everything you need to
+              <br />
+              make change happen.
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              A complete platform designed to connect citizens, track issues, and drive real improvements in your community.
+            </p>
+          </div>
+
+          {/* Features Grid */}
+          <div className="grid lg:grid-cols-3 gap-12">
+            
+            {/* Feature 1 */}
+            <div className="group">
+              <div className="bg-white rounded-3xl p-8 h-full shadow-sm hover:shadow-lg transition-all duration-300 border border-orange-100 hover:border-orange-200">
+                <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300">
+                  <Camera className="w-10 h-10 text-white" />
+                </div>
+                <h3 className="text-2xl font-semibold text-gray-900 mb-4">Report with Ease</h3>
+                <p className="text-gray-600 leading-relaxed text-lg">
+                  Snap a photo, describe the issue, and pinpoint the exact location. Our smart forms make reporting quick and comprehensive.
+                </p>
+              </div>
+            </div>
+
+            {/* Feature 2 */}
+            <div className="group">
+              <div className="bg-white rounded-3xl p-8 h-full shadow-sm hover:shadow-lg transition-all duration-300 border border-emerald-100 hover:border-emerald-200">
+                <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300">
+                  <Users className="w-10 h-10 text-white" />
+                </div>
+                <h3 className="text-2xl font-semibold text-gray-900 mb-4">Community Power</h3>
+                <p className="text-gray-600 leading-relaxed text-lg">
+                  Vote on issues, add comments, and collaborate with neighbors. Together, your voices create real change and accountability.
+                </p>
+              </div>
+            </div>
+
+            {/* Feature 3 */}
+            <div className="group">
+              <div className="bg-white rounded-3xl p-8 h-full shadow-sm hover:shadow-lg transition-all duration-300 border border-amber-100 hover:border-amber-200">
+                <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-amber-600 rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300">
+                  <TrendingUp className="w-10 h-10 text-white" />
+                </div>
+                <h3 className="text-2xl font-semibold text-gray-900 mb-4">Track Progress</h3>
+                <p className="text-gray-600 leading-relaxed text-lg">
+                  Follow your reports from submission to resolution. Real-time updates keep you informed every step of the way.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* Community CTA Section with Background Image */}
+      <section className="relative py-32 overflow-hidden">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+            backgroundImage: `url(${handsImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
           }}
-          animate={{
-            backgroundPosition: ["0% 0%", "100% 100%"],
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
         />
         
-        <div className="relative px-6 py-20 sm:px-6 sm:py-28 lg:px-8">
-          <motion.div 
-            className="mx-auto max-w-2xl text-center"
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <motion.h2 
-              className="text-4xl font-bold tracking-tight text-white sm:text-5xl"
-              animate={{
-                textShadow: [
-                  "0 0 20px rgba(255,255,255,0.5)",
-                  "0 0 30px rgba(255,255,255,0.8)",
-                  "0 0 20px rgba(255,255,255,0.5)"
-                ]
-              }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-gray-900/75" />
+        
+        <div className="relative z-10 max-w-4xl mx-auto px-8 text-center">
+          <h2 className="text-6xl font-semibold text-white mb-8 leading-tight">
+            Ready to transform
+            <br />
+            <span className="text-orange-300">your community?</span>
+          </h2>
+          <p className="text-2xl text-orange-100 mb-12 max-w-2xl mx-auto leading-relaxed">
+            Join thousands of engaged citizens who are already making their neighborhoods better, one report at a time.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <Link
+              to="/register"
+              className="bg-orange-600 text-white px-12 py-6 rounded-2xl font-semibold text-xl hover:bg-orange-700 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl"
             >
-              Ready to Make a Difference?
-            </motion.h2>
-            <motion.p 
-              className="mx-auto mt-8 max-w-xl text-lg leading-8 text-blue-100 font-medium"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-              viewport={{ once: true }}
-            >
-              Join thousands of citizens who are actively improving their communities. Your voice can drive real change.
-            </motion.p>
+              Start Making Change
+              <ArrowRight className="ml-3 w-6 h-6" />
+            </Link>
             
-            <motion.div 
-              className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-6"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-              viewport={{ once: true }}
+            <Link
+              to="/dashboard"
+              className="border-2 border-orange-300 text-white px-12 py-6 rounded-2xl font-semibold text-xl hover:border-orange-200 hover:bg-orange-600/20 transition-all duration-300 flex items-center justify-center backdrop-blur-sm"
             >
-              <motion.div {...scaleOnHover}>
-                <Link
-                  to="/register"
-                  className="group relative inline-flex items-center px-8 py-4 text-base font-semibold text-blue-600 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
-                >
-                  <span className="relative z-10">Join SunoAid Today</span>
-                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
-                  <div className="absolute inset-0 bg-blue-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                </Link>
-              </motion.div>
-              
-              <motion.div {...scaleOnHover}>
-                <Link
-                  to="/dashboard"
-                  className="group inline-flex items-center px-8 py-4 text-base font-semibold text-white bg-white/20 backdrop-blur-sm rounded-2xl border border-white/30 hover:border-white/50 hover:bg-white/30 transition-all duration-300 shadow-sm hover:shadow-md"
-                >
-                  Explore Issues 
-                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
-                </Link>
-              </motion.div>
-            </motion.div>
-          </motion.div>
+              See It In Action
+            </Link>
+          </div>
+          
+          <p className="text-orange-200 mt-8 text-lg">
+            Free to use • No credit card required
+          </p>
         </div>
       </section>
     </div>

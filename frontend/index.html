@@ -4,10 +4,76 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
+    <title>SunoAid - Civic Issue Reporting Platform</title>
+    <meta name="description" content="Report civic issues, collaborate with neighbors, and track real progress in your community." />
+    <meta name="theme-color" content="#ea580c" />
+    
+    <!-- Preconnect to improve font loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="/vite.svg" />
+    
+    <!-- Enhanced Meta Tags -->
+    <meta property="og:title" content="SunoAid - Civic Issue Reporting Platform" />
+    <meta property="og:description" content="Report civic issues, collaborate with neighbors, and track real progress in your community." />
+    <meta property="og:type" content="website" />
+    
+    <style>
+      /* Immediate anti-FOUC (Flash of Unstyled Content) styles */
+      html {
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        line-height: 1.5;
+        -webkit-text-size-adjust: 100%;
+        -moz-tab-size: 4;
+        tab-size: 4;
+      }
+      
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #ffffff;
+        color: #111827;
+        font-feature-settings: normal;
+        font-variation-settings: normal;
+      }
+      
+      #root {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      /* Loading state */
+      .loading-fallback {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #fed7aa 0%, #fdba74 50%, #fb923c 100%);
+        color: #9a3412;
+        font-size: 1.125rem;
+        font-weight: 500;
+      }
+      
+      /* Hide loading fallback once React loads */
+      #root:not(:empty) + .loading-fallback {
+        display: none;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+    
+    <!-- Fallback content for when JavaScript is disabled or loading -->
+    <div class="loading-fallback">
+      <div>
+        <div style="margin-bottom: 1rem; font-size: 1.5rem; font-weight: 600;">SunoAid</div>
+        <div>Loading your community platform...</div>
+      </div>
+    </div>
+    
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

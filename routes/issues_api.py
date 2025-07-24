@@ -20,6 +20,7 @@ def get_issues():
         location_id = request.args.get('location_id', type=int)
         status = request.args.get('status')
         search = request.args.get('search')
+        sort = request.args.get('sort', 'recent')
         
         query = Issue.query
         
@@ -33,8 +34,23 @@ def get_issues():
         if search:
             query = query.filter(Issue.title.contains(search) | Issue.description.contains(search))
         
-        # Order by creation date (newest first)
-        query = query.order_by(Issue.created_at.desc())
+        # Apply sorting
+        if sort == 'popular':
+            query = query.order_by((Issue.upvotes - Issue.downvotes).desc(), Issue.created_at.desc())
+        elif sort == 'urgent':
+            # Order by severity priority: critical > high > medium > low, then by creation date
+            query = query.order_by(
+                db.case(
+                    (Issue.severity == 'critical', 1),
+                    (Issue.severity == 'high', 2),
+                    (Issue.severity == 'medium', 3),
+                    (Issue.severity == 'low', 4),
+                    else_=5
+                ),
+                Issue.created_at.desc()
+            )
+        else:  # recent (default)
+            query = query.order_by(Issue.created_at.desc())
         
         # Paginate
         pagination = query.paginate(page=page, per_page=per_page)
@@ -78,7 +94,7 @@ def create_issue():
             user_id=user.id,
             category_id=data['category_id'],
             location_id=data['location_id'],
-            priority=data.get('severity', 'medium'),  # Map severity to priority
+            severity=data.get('severity', 'medium'),
             address=data.get('address'),
             latitude=data.get('latitude'),
             longitude=data.get('longitude'),

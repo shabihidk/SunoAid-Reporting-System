@@ -1,254 +1,462 @@
-import React, { useState } from 'react';
-import { 
-  Bell, 
-  Shield, 
-  Lock, 
-  Eye,
-  Save,
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  Camera
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { MapPin, ThumbsUp, ThumbsDown, MessageCircle, Clock, ArrowLeft, Flag, Eye, Calendar, User } from 'lucide-react';
+import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 
-const SettingsPage: React.FC = () => {
+interface Issue {
+  id: number;
+  title: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+  severity: string;
+  status: string;
+  media_urls: string[];
+  address: string;
+  latitude: number;
+  longitude: number;
+  upvotes: number;
+  downvotes: number;
+  views: number;
+  user: {
+    id: number;
+    name: string;
+    avatar_url?: string;
+  };
+  location: {
+    id: number;
+    name: string;
+    city: string;
+    province: string;
+  };
+  category: {
+    id: number;
+    name: string;
+    color: string;
+    icon: string;
+  };
+  comments_count: number;
+  resolved_at?: string;
+}
+
+interface Comment {
+  id: number;
+  content: string;
+  created_at: string;
+  user: {
+    id: number;
+    name: string;
+    avatar_url?: string;
+  };
+  replies_count: number;
+}
+
+const IssueDetailPage: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('profile');
-  const [notifications, setNotifications] = useState({
-    email: true,
-    push: true,
-    sms: false
-  });
-  const [privacy, setPrivacy] = useState({
-    profileVisible: true,
-    showLocation: true,
-    showRealName: true
-  });
+  const [issue, setIssue] = useState<Issue | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [commentLoading, setCommentLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const tabs = [
-    { id: 'profile', label: 'Profile', icon: User },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'privacy', label: 'Privacy', icon: Shield },
-    { id: 'security', label: 'Security', icon: Lock }
-  ];
+  useEffect(() => {
+    if (id) {
+      fetchIssue();
+      fetchComments();
+    }
+  }, [id]);
 
-  const toggleNotification = (key: keyof typeof notifications) => {
-    setNotifications(prev => ({ ...prev, [key]: !prev[key] }));
+  const fetchIssue = async () => {
+    try {
+      const response = await axios.get(`issues/${id}`);
+      setIssue(response.data.issue);
+    } catch (error) {
+      setError('Failed to load issue details');
+      console.error('Failed to fetch issue:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const togglePrivacy = (key: keyof typeof privacy) => {
-    setPrivacy(prev => ({ ...prev, [key]: !prev[key] }));
+  const fetchComments = async () => {
+    try {
+      const response = await axios.get(`issues/${id}/comments`);
+      setComments(response.data.comments);
+    } catch (error) {
+      console.error('Failed to fetch comments:', error);
+    }
   };
+
+  const handleVote = async (voteType: 'up' | 'down') => {
+    if (!user) return;
+    
+    try {
+      await axios.post(`issues/${id}/vote`, { vote_type: voteType });
+      fetchIssue();
+    } catch (error) {
+      console.error('Failed to vote:', error);
+    }
+  };
+
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim() || !user) return;
+
+    setCommentLoading(true);
+    try {
+      await axios.post(`issues/${id}/comments`, { content: newComment });
+      setNewComment('');
+      fetchComments();
+    } catch (error) {
+      console.error('Failed to post comment:', error);
+    } finally {
+      setCommentLoading(false);
+    }
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}d ago`;
+    return date.toLocaleDateString();
+  };
+
+  const getSeverityConfig = (severity: string) => {
+    switch (severity) {
+      case 'low': return { color: 'text-emerald-700 bg-emerald-50 border-emerald-200', label: 'Low Priority' };
+      case 'medium': return { color: 'text-amber-700 bg-amber-50 border-amber-200', label: 'Medium Priority' };
+      case 'high': return { color: 'text-orange-700 bg-orange-50 border-orange-200', label: 'High Priority' };
+      case 'critical': return { color: 'text-red-700 bg-red-50 border-red-200', label: 'Critical' };
+      default: return { color: 'text-gray-700 bg-gray-50 border-gray-200', label: severity };
+    }
+  };
+
+  const getStatusConfig = (status: string) => {
+    switch (status) {
+      case 'open': return { color: 'text-blue-700 bg-blue-50 border-blue-200', label: 'Open' };
+      case 'in_progress': return { color: 'text-amber-700 bg-amber-50 border-amber-200', label: 'In Progress' };
+      case 'resolved': return { color: 'text-emerald-700 bg-emerald-50 border-emerald-200', label: 'Resolved' };
+      case 'closed': return { color: 'text-gray-700 bg-gray-50 border-gray-200', label: 'Closed' };
+      default: return { color: 'text-gray-700 bg-gray-50 border-gray-200', label: status.replace('_', ' ') };
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50/50 via-white to-amber-50/30 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-orange-200 border-t-orange-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading issue details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !issue) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50/50 via-white to-amber-50/30 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-6">
+          <div className="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Flag className="w-12 h-12 text-orange-600" />
+          </div>
+          <h2 className="text-3xl font-semibold text-gray-900 mb-4">Issue Not Found</h2>
+          <p className="text-gray-600 mb-8 text-lg">{error || 'The issue you\'re looking for doesn\'t exist or may have been removed.'}</p>
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center px-8 py-4 bg-orange-600 text-white font-semibold rounded-2xl hover:bg-orange-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+          >
+            <ArrowLeft className="w-5 h-5 mr-3" />
+            Back to Dashboard
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const severityConfig = getSeverityConfig(issue.severity);
+  const statusConfig = getStatusConfig(issue.status);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
-          {/* Header */}
-          <div className="px-8 py-6 bg-gradient-to-r from-blue-600/5 to-indigo-600/5 border-b border-gray-100">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-              Settings
-            </h1>
-            <p className="text-gray-600 mt-2">Manage your account preferences and privacy settings</p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50/50 via-white to-amber-50/30">
+      {/* Header Section */}
+      <div className="bg-white/80 backdrop-blur-sm border-b border-orange-100/50 sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-8 py-6">
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center text-gray-600 hover:text-orange-600 font-medium transition-colors duration-200 group"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform duration-200" />
+            Back to Issues
+          </Link>
+        </div>
+      </div>
 
-          <div className="flex">
-            {/* Sidebar */}
-            <div className="w-80 border-r border-gray-100 bg-gray-50/50">
-              <nav className="p-6 space-y-2">
-                {tabs.map((tab) => {
-                  const Icon = tab.icon;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`w-full flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
-                        activeTab === tab.id
-                          ? 'bg-blue-500 text-white shadow-lg transform scale-105'
-                          : 'text-gray-600 hover:bg-white hover:shadow-md'
-                      }`}
-                    >
-                      <Icon className="w-5 h-5 mr-3" />
-                      {tab.label}
-                    </button>
-                  );
-                })}
-              </nav>
+      <div className="max-w-6xl mx-auto px-8 py-12">
+        {/* Main Issue Card */}
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-lg border border-orange-100/50 overflow-hidden mb-8">
+          {/* Issue Header */}
+          <div className="p-12">
+            {/* Author & Meta Info */}
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  {issue.user.avatar_url ? (
+                    <img className="h-16 w-16 rounded-full border-4 border-orange-100" src={issue.user.avatar_url} alt="" />
+                  ) : (
+                    <div className="h-16 w-16 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center border-4 border-orange-100">
+                      <span className="text-white font-semibold text-xl">
+                        {issue.user.name.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center">
+                    <User className="w-3 h-3 text-white" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900">{issue.user.name}</h3>
+                  <div className="flex items-center space-x-4 text-gray-600 mt-1">
+                    <span className="flex items-center text-sm">
+                      <Clock className="w-4 h-4 mr-1" />
+                      {formatTimeAgo(issue.created_at)}
+                    </span>
+                    <span className="flex items-center text-sm">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      {issue.location.city}, {issue.location.province}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <span className={`px-4 py-2 rounded-full text-sm font-semibold border ${severityConfig.color}`}>
+                  {severityConfig.label}
+                </span>
+                <span className={`px-4 py-2 rounded-full text-sm font-semibold border ${statusConfig.color}`}>
+                  {statusConfig.label}
+                </span>
+              </div>
             </div>
 
-            {/* Content */}
-            <div className="flex-1 p-8">
-              {activeTab === 'profile' && (
-                <div className="space-y-8">
-                  <div className="text-center">
-                    <div className="relative inline-block">
-                      <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-4xl font-bold shadow-xl">
-                        {user?.name?.charAt(0).toUpperCase()}
-                      </div>
-                      <button className="absolute bottom-2 right-2 bg-white rounded-full p-2 shadow-lg hover:shadow-xl transition-shadow duration-200">
-                        <Camera className="w-4 h-4 text-gray-600" />
-                      </button>
-                    </div>
-                    <h2 className="text-2xl font-bold mt-4 text-gray-900">{user?.name}</h2>
-                    <p className="text-gray-600">{user?.email}</p>
+            {/* Issue Title */}
+            <h1 className="text-4xl font-semibold text-gray-900 mb-6 leading-tight">{issue.title}</h1>
+
+            {/* Category */}
+            <div className="mb-8">
+              <span
+                className="inline-flex items-center px-6 py-3 rounded-2xl text-sm font-semibold"
+                style={{ backgroundColor: issue.category.color + '20', color: issue.category.color }}
+              >
+                {issue.category.name}
+              </span>
+            </div>
+
+            {/* Description */}
+            <div className="prose prose-lg max-w-none mb-8">
+              <p className="text-gray-700 leading-relaxed text-lg whitespace-pre-wrap">{issue.description}</p>
+            </div>
+
+            {/* Address */}
+            {issue.address && (
+              <div className="mb-8 p-6 bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl border border-orange-100">
+                <div className="flex items-center text-gray-800">
+                  <div className="w-10 h-10 bg-orange-500 rounded-2xl flex items-center justify-center mr-4">
+                    <MapPin className="w-5 h-5 text-white" />
                   </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <label className="block">
-                        <span className="text-sm font-medium text-gray-700 mb-2 block">Full Name</span>
-                        <div className="relative">
-                          <User className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
-                          <input
-                            type="text"
-                            defaultValue={user?.name}
-                            className="pl-10 w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all duration-200"
-                          />
-                        </div>
-                      </label>
-                      
-                      <label className="block">
-                        <span className="text-sm font-medium text-gray-700 mb-2 block">Email</span>
-                        <div className="relative">
-                          <Mail className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
-                          <input
-                            type="email"
-                            defaultValue={user?.email}
-                            className="pl-10 w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all duration-200"
-                          />
-                        </div>
-                      </label>
-                    </div>
-
-                    <div className="space-y-4">
-                      <label className="block">
-                        <span className="text-sm font-medium text-gray-700 mb-2 block">Phone</span>
-                        <div className="relative">
-                          <Phone className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
-                          <input
-                            type="tel"
-                            defaultValue={user?.phone}
-                            className="pl-10 w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all duration-200"
-                          />
-                        </div>
-                      </label>
-                      
-                      <label className="block">
-                        <span className="text-sm font-medium text-gray-700 mb-2 block">Location</span>
-                        <div className="relative">
-                          <MapPin className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
-                          <input
-                            type="text"
-                            placeholder="Your location"
-                            className="pl-10 w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all duration-200"
-                          />
-                        </div>
-                      </label>
-                    </div>
+                  <div>
+                    <p className="font-semibold text-sm text-gray-600 uppercase tracking-wide">Location</p>
+                    <p className="text-lg font-medium">{issue.address}</p>
                   </div>
                 </div>
-              )}
+              </div>
+            )}
 
-              {activeTab === 'notifications' && (
-                <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-gray-900">Notification Preferences</h3>
-                  
-                  {Object.entries({
-                    email: { label: 'Email Notifications', desc: 'Receive updates via email' },
-                    push: { label: 'Push Notifications', desc: 'Browser and mobile notifications' },
-                    sms: { label: 'SMS Notifications', desc: 'Text message alerts' }
-                  }).map(([key, config]) => (
-                    <div key={key} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                      <div>
-                        <h4 className="font-medium text-gray-900">{config.label}</h4>
-                        <p className="text-sm text-gray-600">{config.desc}</p>
-                      </div>
-                      <button
-                        onClick={() => toggleNotification(key as keyof typeof notifications)}
-                        className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
-                          notifications[key as keyof typeof notifications] ? 'bg-blue-500' : 'bg-gray-300'
-                        }`}
-                      >
-                        <div
-                          className={`w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 transition-transform duration-200 ${
-                            notifications[key as keyof typeof notifications] ? 'transform translate-x-6' : 'transform translate-x-0.5'
-                          }`}
+            {/* Media Grid */}
+            {issue.media_urls && issue.media_urls.length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-2xl font-semibold text-gray-900 mb-6">Issue Photos</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {issue.media_urls.map((url, index) => {
+                    const imageUrl = url.startsWith('http') ? url : `http://localhost:5000${url}`;
+                    return (
+                      <div key={index} className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
+                        <img
+                          src={imageUrl}
+                          alt={`Issue photo ${index + 1}`}
+                          className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            console.error('Failed to load image:', imageUrl);
+                            e.currentTarget.style.display = 'none';
+                          }}
                         />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {activeTab === 'privacy' && (
-                <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-gray-900">Privacy Settings</h3>
-                  
-                  {Object.entries({
-                    profileVisible: { label: 'Public Profile', desc: 'Make your profile visible to others' },
-                    showLocation: { label: 'Show Location', desc: 'Display your location on reports' },
-                    showRealName: { label: 'Show Real Name', desc: 'Use your real name instead of username' }
-                  }).map(([key, config]) => (
-                    <div key={key} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                      <div className="flex items-center">
-                        {key === 'profileVisible' && <Eye className="w-5 h-5 text-gray-400 mr-3" />}
-                        {key === 'showLocation' && <MapPin className="w-5 h-5 text-gray-400 mr-3" />}
-                        {key === 'showRealName' && <User className="w-5 h-5 text-gray-400 mr-3" />}
-                        <div>
-                          <h4 className="font-medium text-gray-900">{config.label}</h4>
-                          <p className="text-sm text-gray-600">{config.desc}</p>
-                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       </div>
-                      <button
-                        onClick={() => togglePrivacy(key as keyof typeof privacy)}
-                        className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
-                          privacy[key as keyof typeof privacy] ? 'bg-blue-500' : 'bg-gray-300'
-                        }`}
-                      >
-                        <div
-                          className={`w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 transition-transform duration-200 ${
-                            privacy[key as keyof typeof privacy] ? 'transform translate-x-6' : 'transform translate-x-0.5'
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
-              )}
+              </div>
+            )}
 
-              {activeTab === 'security' && (
-                <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-gray-900">Security Settings</h3>
-                  
-                  <div className="space-y-4">
-                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
-                      <h4 className="font-medium text-yellow-800">Two-Factor Authentication</h4>
-                      <p className="text-sm text-yellow-700 mt-1">Add an extra layer of security to your account</p>
-                      <button className="mt-3 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors duration-200">
-                        Enable 2FA
-                      </button>
-                    </div>
-
-                    <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
-                      <h4 className="font-medium text-red-800">Change Password</h4>
-                      <p className="text-sm text-red-700 mt-1">Update your password regularly for better security</p>
-                      <button className="mt-3 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200">
-                        Change Password
-                      </button>
-                    </div>
+            {/* Engagement Stats */}
+            <div className="flex items-center justify-between pt-8 border-t border-gray-200">
+              <div className="flex items-center space-x-8">
+                <button
+                  onClick={() => handleVote('up')}
+                  disabled={!user}
+                  className="group flex items-center space-x-3 text-gray-600 hover:text-emerald-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <div className="w-12 h-12 bg-gray-100 group-hover:bg-emerald-50 group-hover:text-emerald-600 rounded-2xl flex items-center justify-center transition-all duration-200">
+                    <ThumbsUp className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-lg">{issue.upvotes}</p>
+                    <p className="text-sm text-gray-500">Upvotes</p>
+                  </div>
+                </button>
+                
+                <button
+                  onClick={() => handleVote('down')}
+                  disabled={!user}
+                  className="group flex items-center space-x-3 text-gray-600 hover:text-red-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <div className="w-12 h-12 bg-gray-100 group-hover:bg-red-50 group-hover:text-red-600 rounded-2xl flex items-center justify-center transition-all duration-200">
+                    <ThumbsDown className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-lg">{issue.downvotes}</p>
+                    <p className="text-sm text-gray-500">Downvotes</p>
+                  </div>
+                </button>
+                
+                <div className="flex items-center space-x-3 text-gray-600">
+                  <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center">
+                    <MessageCircle className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-lg">{issue.comments_count}</p>
+                    <p className="text-sm text-gray-500">Comments</p>
                   </div>
                 </div>
-              )}
-
-              {/* Save Button */}
-              <div className="flex justify-end pt-6 border-t border-gray-100 mt-8">
-                <button className="flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
-                  <Save className="w-5 h-5 mr-2" />
-                  Save Changes
+              </div>
+              
+              <div className="flex items-center space-x-6 text-gray-500">
+                <div className="flex items-center space-x-2">
+                  <Eye className="w-5 h-5" />
+                  <span className="font-medium">{issue.views} views</span>
+                </div>
+                <button className="p-3 hover:bg-gray-100 rounded-2xl transition-colors duration-200">
+                  <Flag className="w-5 h-5" />
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Comments Section */}
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-lg border border-orange-100/50 overflow-hidden">
+          <div className="p-12">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-3xl font-semibold text-gray-900">
+                Discussion ({comments.length})
+              </h3>
+            </div>
+
+            {/* Add Comment Form */}
+            {user ? (
+              <form onSubmit={handleCommentSubmit} className="mb-12">
+                <div className="flex space-x-6">
+                  <div className="flex-shrink-0">
+                    {user.avatar_url ? (
+                      <img className="h-12 w-12 rounded-full border-2 border-orange-200" src={user.avatar_url} alt="" />
+                    ) : (
+                      <div className="h-12 w-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center border-2 border-orange-200">
+                        <span className="text-white font-medium">
+                          {user.name.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <textarea
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      className="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none transition-all duration-200"
+                      rows={4}
+                      placeholder="Share your thoughts on this issue..."
+                    />
+                    <div className="mt-4 flex justify-end">
+                      <button
+                        type="submit"
+                        disabled={!newComment.trim() || commentLoading}
+                        className="px-8 py-4 bg-orange-600 text-white font-semibold rounded-2xl hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+                      >
+                        {commentLoading ? 'Posting...' : 'Post Comment'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            ) : (
+              <div className="mb-12 p-8 bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl text-center border border-orange-100">
+                <MessageCircle className="w-12 h-12 text-orange-500 mx-auto mb-4" />
+                <p className="text-gray-700 text-lg">
+                  <Link to="/login" className="text-orange-600 hover:text-orange-700 font-semibold underline decoration-2 underline-offset-2">
+                    Sign in
+                  </Link>{' '}
+                  to join the discussion and help solve this issue
+                </p>
+              </div>
+            )}
+
+            {/* Comments List */}
+            <div className="space-y-8">
+              {comments.map(comment => (
+                <div key={comment.id} className="flex space-x-6">
+                  <div className="flex-shrink-0">
+                    {comment.user.avatar_url ? (
+                      <img className="h-12 w-12 rounded-full border-2 border-gray-200" src={comment.user.avatar_url} alt="" />
+                    ) : (
+                      <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center border-2 border-gray-200">
+                        <span className="text-white font-medium">
+                          {comment.user.name.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                      <div className="flex items-center space-x-3 mb-3">
+                        <span className="font-semibold text-gray-900">{comment.user.name}</span>
+                        <span className="text-sm text-gray-500 flex items-center">
+                          <Calendar className="w-4 h-4 mr-1" />
+                          {formatTimeAgo(comment.created_at)}
+                        </span>
+                      </div>
+                      <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{comment.content}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {comments.length === 0 && (
+                <div className="text-center py-16">
+                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <MessageCircle className="w-10 h-10 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">No comments yet</h3>
+                  <p className="text-gray-600 text-lg">
+                    Be the first to share your thoughts and help solve this community issue.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -257,4 +465,4 @@ const SettingsPage: React.FC = () => {
   );
 };
 
-export default SettingsPage;
+export default IssueDetailPage;
