@@ -10,6 +10,7 @@ import ProfilePage from './pages/ProfilePage'
 import IssueDetailPage from './pages/IssueDetailPage'
 import SettingsPage from './pages/SettingsPage'
 import ProtectedRoute from './components/ProtectedRoute'
+import AdminDashboardPage from './pages/AdminDashboardPage';
 import './App.css'
 
 function App() {
@@ -27,6 +28,9 @@ function App() {
                 <DashboardPage />
               </ProtectedRoute>
             } />
+
+            <Route path="/admin" element={<AdminDashboardPage />} />
+
             <Route path="/report" element={
               <ProtectedRoute>
                 <ReportIssuePage />

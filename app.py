@@ -5,6 +5,7 @@ from models.models import db
 from flask_login import LoginManager
 from flask_cors import CORS
 
+
 # Load environment variables
 load_dotenv()
 
@@ -60,12 +61,14 @@ from routes.auth_api import auth_api_bp
 from routes.issues_api import issues_api_bp
 from routes.locations_api import locations_api_bp
 from routes.upload_api import upload_api_bp
+from routes.admin_api_bp import admin_api_bp
 
 # Register blueprints
 app.register_blueprint(auth_api_bp, url_prefix='/api/auth')
 app.register_blueprint(issues_api_bp, url_prefix='/api/issues')
 app.register_blueprint(locations_api_bp, url_prefix='/api/locations')
 app.register_blueprint(upload_api_bp, url_prefix='/api/upload')
+app.register_blueprint(admin_api_bp, url_prefix='/api/admin')
 
 @app.route('/api/health')
 def health_check():

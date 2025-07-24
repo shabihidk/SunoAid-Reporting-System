@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Mail, Lock, AlertCircle, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import loginDashImage from '../assets/images/logindash.jpg';
@@ -11,22 +11,40 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { user, login } = useAuth();
-
-  // Redirect if already logged in
+  const navigate = useNavigate();
+  
+  // This redirect for already-logged-in users is correct and should stay.
   if (user) {
+    // If we know the user's email, we can redirect an already-logged-in admin correctly.
+    if (user.email === 'admin@test.com') {
+      return <Navigate to="/admin" replace />;
+    }
     return <Navigate to="/dashboard" replace />;
   }
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
+    
+    // Using a single try/catch block for cleaner error handling.
     try {
+      // Step 1: Call the login function regardless. 
+      // It will throw an error if credentials are bad for ANY user.
       await login(email, password);
-      // Navigate will happen automatically due to user state change
+      
+      // Step 2: If login succeeds, THEN check if it was the admin.
+      if (email === 'admin@test.com' && password === 'admin') {
+        // If it was the admin, navigate to the admin dashboard.
+        navigate('/admin');
+      } else {
+        // For any other successful login, navigate to the user dashboard.
+        navigate('/dashboard');
+      }
+
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed. Please try again.');
+      // This single catch will handle both failed admin and user login attempts.
+      setError(err.response?.data?.error || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
